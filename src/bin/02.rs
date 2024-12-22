@@ -7,7 +7,7 @@ enum DIRECTION {
     UNSET,
 }
 
-fn is_safe(digits: &Vec<i32>) -> bool {
+fn is_safe(digits: &Vec<i64>) -> bool {
     let mut prev_dir = DIRECTION::UNSET;
 
     for i in 0..digits.len() - 1 {
@@ -29,13 +29,13 @@ fn is_safe(digits: &Vec<i32>) -> bool {
     true
 }
 
-pub fn part_one(input: &str) -> Option<u32> {
-    let mut safe: i32 = 0;
+pub fn part_one(input: &str) -> Option<u64> {
+    let mut safe: i64 = 0;
 
     for line in input.lines() {
-        let digits: Vec<i32> = line
+        let digits: Vec<i64> = line
             .split_whitespace()
-            .filter_map(|x| x.parse::<i32>().ok())
+            .filter_map(|x| x.parse::<i64>().ok())
             .collect();
 
         let mut prev_dir = DIRECTION::UNSET;
@@ -62,17 +62,17 @@ pub fn part_one(input: &str) -> Option<u32> {
         safe += 1;
     }
 
-    Some(safe as u32)
+    Some(safe as u64)
 }
 
 // Brute force, probably a better way but who cares
-pub fn part_two(input: &str) -> Option<u32> {
+pub fn part_two(input: &str) -> Option<u64> {
     let mut safe = 0;
 
     for line in input.lines() {
-        let digits: Vec<i32> = line
+        let digits: Vec<i64> = line
             .split_whitespace()
-            .filter_map(|x| x.parse::<i32>().ok())
+            .filter_map(|x| x.parse::<i64>().ok())
             .collect();
 
         for i in 0..digits.len() {

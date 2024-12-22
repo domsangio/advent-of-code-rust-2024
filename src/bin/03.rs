@@ -2,13 +2,13 @@ advent_of_code::solution!(3);
 
 use regex::Regex;
 
-pub fn part_one(input: &str) -> Option<u32> {
+pub fn part_one(input: &str) -> Option<u64> {
     let mul_match = Regex::new(r"mul\((\d+),(\d+)\)").unwrap();
     let mut total = 0;
 
     for m in mul_match.captures_iter(input) {
-        let a = m[1].parse::<u32>().unwrap();
-        let b = m[2].parse::<u32>().unwrap();
+        let a = m[1].parse::<u64>().unwrap();
+        let b = m[2].parse::<u64>().unwrap();
 
         total += a * b;
     }
@@ -16,7 +16,7 @@ pub fn part_one(input: &str) -> Option<u32> {
     Some(total)
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
+pub fn part_two(input: &str) -> Option<u64> {
     // So slow bruh, maybe scan for m then do the match ?
     let pattern_match = Regex::new(r"do\(\)|don\'t\(\)|mul\(\d+,\d+\)").unwrap();
 

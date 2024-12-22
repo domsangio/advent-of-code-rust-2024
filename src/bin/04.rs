@@ -1,6 +1,6 @@
 advent_of_code::solution!(4);
 
-fn how_many_xmas(grid: &Vec<Vec<char>>, i: usize, j: usize) -> u32 {
+fn how_many_xmas(grid: &Vec<Vec<char>>, i: usize, j: usize) -> u64 {
     let mut count = 0;
     // check across first
     if j < grid[i].len() - 3
@@ -64,7 +64,7 @@ fn how_many_xmas(grid: &Vec<Vec<char>>, i: usize, j: usize) -> u32 {
     count
 }
 
-pub fn part_one(input: &str) -> Option<u32> {
+pub fn part_one(input: &str) -> Option<u64> {
     let mut ret = 0;
     let mut grid: Vec<Vec<char>> = Vec::new();
 
@@ -99,7 +99,7 @@ fn is_x_mas(grid: &Vec<Vec<char>>, i: usize, j: usize) -> bool {
     false
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
+pub fn part_two(input: &str) -> Option<u64> {
     let mut ret = 0;
     let mut grid: Vec<Vec<char>> = Vec::new();
 

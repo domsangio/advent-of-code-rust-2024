@@ -3,11 +3,11 @@ use std::collections::{HashMap, HashSet};
 advent_of_code::solution!(5);
 
 struct ParsedInput {
-    pairs: Vec<(u32, u32)>,
-    levels: Vec<Vec<u32>>,
+    pairs: Vec<(u64, u64)>,
+    levels: Vec<Vec<u64>>,
 }
 
-// Return dependency pairs and then Vec of Vec of u32
+// Return dependency pairs and then Vec of Vec of u64
 fn parse_input(input: &str) -> ParsedInput {
     let mut parsed_input: ParsedInput = ParsedInput {
         pairs: Vec::new(),
@@ -31,7 +31,7 @@ fn parse_input(input: &str) -> ParsedInput {
             remaining_lines
                 .split(',')
                 .map(|x| x.parse().unwrap())
-                .collect::<Vec<u32>>(),
+                .collect::<Vec<u64>>(),
         );
     }
 
@@ -39,7 +39,7 @@ fn parse_input(input: &str) -> ParsedInput {
 }
 
 struct DAG {
-    edges: HashMap<u32, HashSet<u32>>,
+    edges: HashMap<u64, HashSet<u64>>,
 }
 
 impl DAG {
@@ -49,13 +49,13 @@ impl DAG {
         }
     }
 
-    fn set_edges(&mut self, pairs: &Vec<(u32, u32)>) {
+    fn set_edges(&mut self, pairs: &Vec<(u64, u64)>) {
         for (src, dst) in pairs {
             self.add_edge(*src, *dst);
         }
     }
 
-    fn add_edge(&mut self, src: u32, dst: u32) {
+    fn add_edge(&mut self, src: u64, dst: u64) {
         self.edges.entry(src).or_insert(HashSet::new()).insert(dst);
     }
 
@@ -71,9 +71,9 @@ impl DAG {
     }
 }
 
-fn valid_level(level: &Vec<u32>, edge_map: &DAG) -> Option<u32> {
+fn valid_level(level: &Vec<u64>, edge_map: &DAG) -> Option<u64> {
     // println!("Validating level: {}", level.iter().fold(String::new(), |acc, x| acc + ", " + &x.to_string()));
-    let mut working_set = HashSet::<u32>::new();
+    let mut working_set = HashSet::<u64>::new();
 
     for digit in level.iter().rev() {
         if working_set.contains(digit) {
@@ -94,7 +94,7 @@ fn valid_level(level: &Vec<u32>, edge_map: &DAG) -> Option<u32> {
     return Some(level[(level.len() - 1) / 2]);
 }
 
-pub fn part_one(input: &str) -> Option<u32> {
+pub fn part_one(input: &str) -> Option<u64> {
     let parsed_input = parse_input(input);
     let mut dag = DAG::new();
     dag.set_edges(&parsed_input.pairs);
@@ -113,7 +113,7 @@ pub fn part_one(input: &str) -> Option<u32> {
     Some(middle_sum)
 }
 
-fn sort_level(mut level: Vec<u32>, dag: &DAG) -> u32 {
+fn sort_level(mut level: Vec<u64>, dag: &DAG) -> u64 {
     // println!("");
     // println!("Sorting level: {}", level.iter().fold(String::new(), |acc, x| acc + ", " + &x.to_string()));
     for i in (0..level.len() - 1).rev() {
@@ -140,7 +140,7 @@ fn sort_level(mut level: Vec<u32>, dag: &DAG) -> u32 {
     level[(level.len() - 1) / 2]
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
+pub fn part_two(input: &str) -> Option<u64> {
     let parsed_input = parse_input(input);
     let mut dag = DAG::new();
     dag.set_edges(&parsed_input.pairs);

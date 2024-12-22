@@ -10,7 +10,7 @@ enum DIR {
     DOWN,
 }
 
-fn in_bounds(width: i32, height: i32, pos: &(i32, i32)) -> bool {
+fn in_bounds(width: i64, height: i64, pos: &(i64, i64)) -> bool {
     pos.0 >= 0 && pos.0 < width && pos.1 >= 0 && pos.1 < height
 }
 
@@ -23,7 +23,7 @@ fn turn(dir: &DIR) -> DIR {
     }
 }
 
-fn get_next_pos(dir: &DIR, pos: &(i32, i32)) -> (i32, i32) {
+fn get_next_pos(dir: &DIR, pos: &(i64, i64)) -> (i64, i64) {
     match dir {
         DIR::LEFT => (pos.0, pos.1 - 1),
         DIR::RIGHT => (pos.0, pos.1 + 1),
@@ -32,7 +32,7 @@ fn get_next_pos(dir: &DIR, pos: &(i32, i32)) -> (i32, i32) {
     }
 }
 
-fn parse_input(input: &str) -> (Vec<Vec<char>>, DIR, (i32, i32)) {
+fn parse_input(input: &str) -> (Vec<Vec<char>>, DIR, (i64, i64)) {
     let mut pos = (-1, -1);
     let mut dir = DIR::DOWN;
     let grid: Vec<Vec<char>> = input
@@ -44,7 +44,7 @@ fn parse_input(input: &str) -> (Vec<Vec<char>>, DIR, (i32, i32)) {
                 .map(|(col, c)| {
                     match c {
                         '^' | '>' | 'v' | '<' => {
-                            pos = (row as i32, col as i32);
+                            pos = (row as i64, col as i64);
                             dir = match c {
                                 '^' => DIR::UP,
                                 '>' => DIR::RIGHT,
@@ -65,17 +65,17 @@ fn parse_input(input: &str) -> (Vec<Vec<char>>, DIR, (i32, i32)) {
 
 fn get_visited_pos(
     start_dir: &DIR,
-    start_pos: &(i32, i32),
+    start_pos: &(i64, i64),
     grid: &Vec<Vec<char>>,
-) -> HashSet<(i32, i32)> {
+) -> HashSet<(i64, i64)> {
     let width = grid.len();
     let height = grid[0].len();
 
-    let mut visited: HashSet<(i32, i32)> = HashSet::new();
+    let mut visited: HashSet<(i64, i64)> = HashSet::new();
     let mut dir = *start_dir;
     let mut pos = start_pos.to_owned();
 
-    while in_bounds(width as i32, height as i32, &pos) {
+    while in_bounds(width as i64, height as i64, &pos) {
         // if weve never been here increment and add to visited
         if !visited.contains(&pos) {
             visited.insert(pos);
@@ -85,7 +85,7 @@ fn get_visited_pos(
         let next_pos = get_next_pos(&dir, &pos);
 
         // turn if we hit an obstacle
-        if in_bounds(width as i32, height as i32, &next_pos)
+        if in_bounds(width as i64, height as i64, &next_pos)
             && grid[next_pos.0 as usize][next_pos.1 as usize] == '#'
         {
             dir = turn(&dir);
@@ -102,18 +102,18 @@ fn get_visited_pos(
 // breaks if in a loop or out of bounds
 fn get_visited_pos_and_dir(
     start_dir: &DIR,
-    start_pos: &(i32, i32),
+    start_pos: &(i64, i64),
     grid: &Vec<Vec<char>>,
-) -> Option<HashSet<(DIR, i32, i32)>> {
+) -> Option<HashSet<(DIR, i64, i64)>> {
     let width = grid.len();
     let height = grid[0].len();
 
-    let mut visited: HashSet<(DIR, i32, i32)> = HashSet::new();
+    let mut visited: HashSet<(DIR, i64, i64)> = HashSet::new();
     let mut dir = *start_dir;
     let mut pos = start_pos.to_owned();
 
     // use less recursion to speed up
-    while in_bounds(width as i32, height as i32, &pos) {
+    while in_bounds(width as i64, height as i64, &pos) {
         let curr_pos = (dir, pos.0, pos.1);
 
         // if weve been exactly here before we are in a loop
@@ -125,7 +125,7 @@ fn get_visited_pos_and_dir(
         let next_pos = get_next_pos(&dir, &pos);
 
         // turn if we hit an obstacle
-        if in_bounds(width as i32, height as i32, &next_pos)
+        if in_bounds(width as i64, height as i64, &next_pos)
             && grid[next_pos.0 as usize][next_pos.1 as usize] == '#'
         {
             dir = turn(&dir);
@@ -139,40 +139,38 @@ fn get_visited_pos_and_dir(
     None
 }
 
-pub fn part_one(input: &str) -> Option<u32> {
+pub fn part_one(input: &str) -> Option<u64> {
     let (grid, dir, pos) = parse_input(input);
-    Some(get_visited_pos(&dir, &pos, &grid).len() as u32)
+    Some(get_visited_pos(&dir, &pos, &grid).len() as u64)
 }
 
-fn debug_loop(l: &HashSet<(DIR, i32, i32)>) {
-    // TODO idek how to debug this ?
-}
-
-pub fn part_two(input: &str) -> Option<u32> {
+pub fn part_two(input: &str) -> Option<u64> {
     let (grid, start_dir, start_pos) = parse_input(input);
     let path = get_visited_pos(&start_dir, &start_pos, &grid);
     let mut tampered_grid = grid.clone();
 
-    Some(
-        path.iter()
-            .filter(|pos| {
-                if **pos == start_pos {
-                    return false;
-                }
-                // add an obstacle here, run if we hit a loop, remove the obstacle (know its on path so not obstacle)
-                tampered_grid[pos.0 as usize][pos.1 as usize] = '#';
-                let f = match get_visited_pos_and_dir(&start_dir, &start_pos, &tampered_grid) {
-                    Some(l) => {
-                        debug_loop(&l);
-                        true
-                    }
-                    None => false,
-                };
-                tampered_grid[pos.0 as usize][pos.1 as usize] = '.';
-                f
-            })
-            .count() as u32,
-    )
+    // skip the starting location
+    let placed_obstacles = path.iter().skip(1).filter(|pos| {
+        if **pos == start_pos {
+            return false;
+        }
+        // add an obstacle here, run if we hit a loop, remove the obstacle (know its on path so not obstacle)
+        tampered_grid[pos.0 as usize][pos.1 as usize] = '#';
+        let f = match get_visited_pos_and_dir(&start_dir, &start_pos, &tampered_grid) {
+            Some(_l) => false,
+            None => true,
+        };
+        tampered_grid[pos.0 as usize][pos.1 as usize] = '.';
+        f
+    });
+
+    let mut unique_obstacles: HashSet<(i64, i64)> = HashSet::new();
+
+    for path in placed_obstacles {
+        unique_obstacles.insert(*path);
+    }
+
+    Some(unique_obstacles.len() as u64)
 }
 
 #[cfg(test)]
