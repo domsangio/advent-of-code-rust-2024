@@ -136,8 +136,24 @@ pub fn part_one(input: &str) -> Option<u64> {
     Some(calculate_checksum(&new_sequence) as u64)
 }
 
+fn collapse(files: &mut Vec<FileBlock>) {
+    for i in (0..files.len()).rev() {
+        if files[i].length == 0 {
+            files.remove(i);
+        }
+    }
+
+    for i in (0..files.len() - 1).rev() {
+        if files[i].id == FREE_SPACE_ID && files[i + 1].id == FREE_SPACE_ID {
+            files[i].length += files[i + 1].length;
+            files.remove(i + 1);
+        }
+    }
+}
+
 pub fn part_two(input: &str) -> Option<u64> {
     let mut original_sequence = parse_input(input);
+    collapse(&mut original_sequence);
 
     // can skip first element
     let mut right_pos = original_sequence.len() - 1;
@@ -148,7 +164,7 @@ pub fn part_two(input: &str) -> Option<u64> {
             continue;
         }
 
-        for left_pos in 0..right_pos {
+        for left_pos in 1..right_pos {
             let left_block = original_sequence[left_pos];
             if left_block.id == FREE_SPACE_ID && left_block.length >= right_block.length {
                 if DEBUG {
@@ -173,6 +189,7 @@ pub fn part_two(input: &str) -> Option<u64> {
                     println!();
                 }
 
+                collapse(&mut original_sequence);
                 break;
             }
         }
